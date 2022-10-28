@@ -66,6 +66,9 @@ elections |> group_by(parties) |> summarize(mean = mean(wgv), n = n()) |>
   geom_text(aes(label = n), vjust = -0.2)
 ```
 
+Effective number of parties
+No of partie further than x from mean.
+Weight dist by votes
 Get map visualization
 
 ```{r}

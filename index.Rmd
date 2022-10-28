@@ -12,4 +12,8 @@ output:
 ## Project description
 
 Polarization is a central issue in contemporary political science, but its definition is tied to the bipartisan nature of the US party system. In this study, I aim to capture a broader phenomenon that affects multi-party political systems: partisan division. While polarization in a two-party system assumes a dichotomic opposition of political stances, multi-partisan division allows for heterogenous inter-party accordance across different dimensions of political conflict. In other words, party A might agree with party B on a specific issue, but may strongly disagree with it on a different one. This allows for the existence of complex framing strategies that go beyond the left/right (liberal/conservative) dichotomy.
-My aim is to gauge the extent of partisan division in complex, multi-party systems. To quantify partisan heterogeneity, I will initially employ the [Manifesto Project Dataset](https://manifesto-project.wzb.eu/).
+The main goal of this study is to determine whether some electoral systems are more likely to be associated with higher partisan division.
+
+## Data sources
+
+For this project, I will be using the [Manifesto Project Dataset](https://manifesto-project.wzb.eu/) to quantify partisan heterogeneity. Data about electoral systems will be scraped from the Institute for Democracy and Electoral Assistance's (IDEA) [Electoral System Design Database](https://www.idea.int/data-tools/data/electoral-system-design)
