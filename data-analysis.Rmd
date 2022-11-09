@@ -54,6 +54,13 @@ for (e in el_iterable) {
 }
 ```
 
+Export data to csv
+
+```{r eval = FALSE}
+write.csv(elections, "data/elections_export.csv", row.names = TRUE)
+```
+
+
 Exploratory analysis of WGV (partisan heterogeneity):
 There seems to be a positive relationship between number of party in an election and my measure of party differences. Is this the result of poor operationalization or is it a substantive finding?
 

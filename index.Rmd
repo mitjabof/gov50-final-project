@@ -17,3 +17,29 @@ The main goal of this study is to determine whether some electoral systems are m
 ## Data sources
 
 For this project, I will be using the [Manifesto Project Dataset](https://manifesto-project.wzb.eu/) to quantify partisan heterogeneity. Data about electoral systems will be scraped from the Institute for Democracy and Electoral Assistance's (IDEA) [Electoral System Design Database](https://www.idea.int/data-tools/data/electoral-system-design)
+
+The Manifesto Project provides data on ideological connotations of political manifestos through the following process: first, it breaks up each manifesto into independent semantic units. Secondly, it labels each unit based on its ideological content. For example, sentences emphasizing the need for tighter border patrol might fall under the label "negative views on immigration". The main dataset lists the relative frequency of each ideological category in a given political manifesto, expressed in percentage points.
+
+## Analytical setup
+
+My analysis focuses on 11 countries (Sweden, Norway, Denmark, Finland, Netherlands, France, Italy, Spain, Germany, United Kingdom, Ireland), covering elections from 1944 to 2021. The ultimate units of my analysis are parties in a given electoral cycle. I conceive each party as a point in an N-dimensional space, where N is the number of categories present in the Manifesto Project (MP) dataset. Party coordinates are determined by the relative frequency of the ideological categories, as specified above. I am interested in quantifying variability in ideological positioning within each electoral cycle and country (henceforth, Within Group Variability, WGV). To do so, I employ the following metric:
+
+$$WGV_e = \sqrt{\frac{1}{P}\sum_{p = 0}^{P}\sum_{c = 0}^{C}(X_{pc} - \bar{X_c})^2}$$
+Where $WGV_e$ is the within-group variability for election $e$, $P$ is the number of parties running in the election, and $C$ is the number of dimensions.
+
+## Exploratory analysis
+
+As a preliminary analysis, I explore some of the features of the data.\
+There seems to be a positive correlation between the number of parties and the average distance between each party and the "partisan average". Each point represents an election cycle.
+
+```{r layout="l-body-outset", echo = FALSE, message=FALSE, warning = FALSE}
+library(tidyverse)
+elections <- read_csv("data/elections_export.csv")
+elections |> ggplot(aes(x = parties, y = wgv)) + 
+  geom_point() + geom_smooth(method = "lm") + 
+  labs(x = "Number of parties",
+       y = "Within-group variability",
+       title = "Relationship between number of parties and variability among parties",
+       subtitle = "226 elections in 11 countries") + theme_classic()
+```
+

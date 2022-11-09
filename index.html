@@ -115,7 +115,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["data/elect_systems_national_leg_europe.csv","data/MPDataset_MPDS2022a.csv","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/header-attrs-2.14/header-attrs.js","index_files/header-attrs-2.17/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["data/elect_systems_national_leg_europe.csv","data/elections_export.csv","data/MPDataset_MPDS2022a.csv","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/figure-html5/unnamed-chunk-1-1.png","index_files/header-attrs-2.14/header-attrs.js","index_files/header-attrs-2.17/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1522,6 +1522,17 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 The main goal of this study is to determine whether some electoral systems are more likely to be associated with higher partisan division.</p>
 <h2 id="data-sources">Data sources</h2>
 <p>For this project, I will be using the <a href="https://manifesto-project.wzb.eu/">Manifesto Project Dataset</a> to quantify partisan heterogeneity. Data about electoral systems will be scraped from the Institute for Democracy and Electoral Assistance’s (IDEA) <a href="https://www.idea.int/data-tools/data/electoral-system-design">Electoral System Design Database</a></p>
+<p>The Manifesto Project provides data on ideological connotations of political manifestos through the following process: first, it breaks up each manifesto into independent semantic units. Secondly, it labels each unit based on its ideological content. For example, sentences emphasizing the need for tighter border patrol might fall under the label “negative views on immigration”. The main dataset lists the relative frequency of each ideological category in a given political manifesto, expressed in percentage points.</p>
+<h2 id="analytical-setup">Analytical setup</h2>
+<p>My analysis focuses on 11 countries (Sweden, Norway, Denmark, Finland, Netherlands, France, Italy, Spain, Germany, United Kingdom, Ireland), covering elections from 1944 to 2021. The ultimate units of my analysis are parties in a given electoral cycle. I conceive each party as a point in an N-dimensional space, where N is the number of categories present in the Manifesto Project (MP) dataset. Party coordinates are determined by the relative frequency of the ideological categories, as specified above. I am interested in quantifying variability in ideological positioning within each electoral cycle and country (henceforth, Within Group Variability, WGV). To do so, I employ the following metric:</p>
+<p><span class="math display">\[WGV_e = \sqrt{\frac{1}{P}\sum_{p = 0}^{P}\sum_{c = 0}^{C}(X_{pc} - \bar{X_c})^2}\]</span>
+Where <span class="math inline">\(WGV_e\)</span> is the within-group variability for election <span class="math inline">\(e\)</span>, <span class="math inline">\(P\)</span> is the number of parties running in the election, and <span class="math inline">\(C\)</span> is the number of dimensions.</p>
+<h2 id="exploratory-analysis">Exploratory analysis</h2>
+<p>As a preliminary analysis, I explore some of the features of the data.<br />
+There seems to be a positive correlation between the number of parties and the average distance between each party and the “partisan average”. Each point represents an election cycle.</p>
+<div class="layout-chunk" data-layout="l-body-outset">
+<p><img src="index_files/figure-html5/unnamed-chunk-1-1.png" width="624" /></p>
+</div>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
@@ -1530,6 +1541,15 @@ The main goal of this study is to determine whether some electoral systems are m
 <div class="d-appendix">
 </div>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->
