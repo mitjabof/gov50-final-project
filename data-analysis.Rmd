@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(infer)
 ```
 
 Loading the Manifesto project data
@@ -50,9 +51,16 @@ for (e in el_iterable) {
     distance <- (party - center)^2 |> sum()
     wgv_squared <- wgv_squared + distance
   }
-  elections$wgv[e] <- sqrt(wgv_squared / elections$parties[e])
+  elections$wgv[e] <- (wgv_squared / elections$parties[e])
 }
 ```
+Mutate elections
+
+```{r}
+elections <- elections |> rowwise() |>
+  mutate(year = str_split(edate, "/")[[1]][3])
+```
+
 
 Export data to csv
 
@@ -65,6 +73,7 @@ Exploratory analysis of WGV (partisan heterogeneity):
 There seems to be a positive relationship between number of party in an election and my measure of party differences. Is this the result of poor operationalization or is it a substantive finding?
 
 ```{r}
+#VIZ
 elections |> ggplot(aes(x = parties, y = wgv)) + 
   geom_point() + geom_smooth(method = "lm")
 
@@ -79,6 +88,7 @@ Weight dist by votes
 Get map visualization
 
 ```{r}
+#MAP VIZ
 library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -109,10 +119,119 @@ ggplot(data = map_cropped) +
 
 ```
 
-Loading electoral system data
+Loading & tidying electoral system data
 
 ```{r}
 syst <- read_csv("data/elect_systems_national_leg_europe.csv") |> 
   filter(Country %in% countries)
+names(syst) <- c("country", "isocode", "iso2166", "year", "elsys")
+syst <- syst |> mutate(systfam = case_when(
+  elsys == "List PR" ~ "Proportional Representation",
+  elsys == "FPTP" | elsys == "STV" | elsys == "TRS" ~ "Plurality",
+  elsys == "Parallel" | elsys == "MMP" ~ "Mixed"
+  )) |>
+  rowwise() |>
+  mutate(year = toString(year))
+```
+
+Joining syst and elections
+
+```{r}
+#elections <- read_csv("data/elections_export.csv")
+elections_sys <- elections |> 
+  inner_join(syst, by = c("countryname" = "country", "year" = "year")) |>
+  select(countryname, edate, year, parties, wgv, elsys, systfam)
+elections_sys
+```
+Save election_sys
+
+```{r}
+write.csv(elections_sys, "data/elections_sys_export.csv", row.names = TRUE)
+```
+
+
+Linear regression
+
+```{r}
+fit <- lm(wgv ~ systfam, data = elections_sys)
+summary(fit)
+```
+
+Visualizing differences
+
+```{r}
+syst_table <- elections_sys |> group_by(systfam) |>
+  summarize(mean_wgv = mean(wgv)) 
+
+knitr::kable(syst_table, digits = 1, col.names = c("System Family", "Average WGV"))
+
+syst_table |> ggplot(aes(x = systfam, y = mean_wgv)) + 
+  geom_col() + labs(title = "Average partisan distance by electoral system family",
+                    x = "System family",
+                    y = "Average WGV")
+```
+
+Statistical significance. Plurality vs Proportional Representation
+
+```{r}
+set.seed(02138)
+diff <- elections_sys |> 
+  filter(systfam %in% c("Proportional Representation", "Plurality")) |>
+  specify(response = wgv, explanatory = systfam) |>
+  calculate(stat = "diff in means", 
+            order = c("Proportional Representation", "Plurality"))
+diff
+
+diff_null_dist <- elections_sys |>
+  filter(systfam %in% c("Proportional Representation", "Plurality")) |>
+  specify(response = wgv, explanatory = systfam) |>
+  hypothesize(null = "independence") |>
+  generate(reps = 1000, type = "permute") |>
+  calculate(stat = "diff in means", 
+            order = c("Proportional Representation", "Plurality"))
+
+plot_prop <- visualize(diff_null_dist) + 
+  shade_p_value(obs_stat = diff, direction = "two-sided") + 
+  labs(title = "Proportional Representation vs Plurality",
+       x = "",
+       y = "")
+
+diff_p <- get_p_value(diff_null_dist, obs_stat = diff, direction = "two-sided")
+diff_p
+```
+Statistical significance. Plurality vs Mixed
+
+```{r}
+set.seed(02138)
+diff_mixed <- elections_sys |> 
+  filter(systfam %in% c("Mixed", "Plurality")) |>
+  specify(response = wgv, explanatory = systfam) |>
+  calculate(stat = "diff in means", 
+            order = c("Mixed", "Plurality"))
+diff_mixed
+
+diff_null_dist_mixed <- elections_sys |>
+  filter(systfam %in% c("Mixed", "Plurality")) |>
+  specify(response = wgv, explanatory = systfam) |>
+  hypothesize(null = "independence") |>
+  generate(reps = 1000, type = "permute") |>
+  calculate(stat = "diff in means", 
+            order = c("Mixed", "Plurality"))
+
+plot_mixed <- visualize(diff_null_dist_mixed) + 
+  shade_p_value(obs_stat = diff_mixed, direction = "two-sided") + 
+  labs(title = "Mixed vs Plurality",
+       x = "",
+       y = "")
+
+diff_p_mixed <- get_p_value(diff_null_dist_mixed, obs_stat = diff_mixed, direction = "two-sided")
+diff_p_mixed
+```
+Grid of plots
+
+```{r include=FALSE}
+png(file = "img/syst_diff_grid.png", height = 800, width = 1500)
+gridExtra::grid.arrange(plot_prop, plot_mixed, ncol = 2)
+dev.off()
 ```
 
